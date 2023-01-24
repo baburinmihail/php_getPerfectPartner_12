@@ -264,7 +264,6 @@
 
      /////////////////////////////////////////////
 
-
      //расчет идеальной пары
      $randon_number2 =  (rand(0, (count($shortSurnameN)-1)));
 
@@ -280,9 +279,11 @@
      $number2 = 10000;
      $prochent = (rand($number1, $number2) )/100;
 
-     echo "$chose_people1 + $chose_people2 = <br>";
-     echo "Идеально на $prochent%<br>";
-     echo "<br><br><br><br>";
+     if ($gender_poName_person1 !== 0){
+         echo "$chose_people1 + $chose_people2 = <br>";
+         echo "Идеально на $prochent%<br>";
+         echo "<br><br><br><br>";
+     }else{}
 
  }
 
