@@ -88,7 +88,6 @@
      $pieces[1] = mb_substr(( $pieces[1]),0,1,"UTF-8");
      $shortName = $pieces[0]." ". $pieces[1];
 
-     echo $shortName."</br>";
      return $shortName;
 
  }
@@ -188,31 +187,103 @@
 
 
  //функция идеальной пары
- function getPerfectPartner($shortName, $array_floor)
+ function getPerfectPartner($surname,$name,$patronomyc,$example_persons_array)
  {
+     //склеил
+     $love_fullName_person1 = getFullnameFromParts($surname,$name,$patronomyc);
 
-     $shortName;
-     $array_floor;
+     //сократил
+     $sokratil_love_fullName_person1 = getShortName($love_fullName_person1);
 
-     $randon_number1 = (rand(0, (count($shortName) - 1)));
-     $randon_number2 = (rand(0, (count($shortName) - 1)));
+     //определяю пол первого человека
+     $gender_poName_person1 = getGenderFromName($love_fullName_person1);
 
-     //подбор идеальной пары через цикл
-     while (($array_floor[$randon_number1] == $array_floor[$randon_number2]) || ($array_floor[$randon_number1] == 0) || ($array_floor[$randon_number2] == 0)) {
-         $randon_number1 = (rand(0, (count($shortName) - 1)));
-         $randon_number2 = (rand(0, (count($shortName) - 1)));
+     ////////////////////////////////////////////////////
+     //перебераю второй масив , вычленяю второго человека
+     foreach ($example_persons_array as $key => $array) {
+         //присвоил в отдельный масив полные имена
+         $myString[$key] = $array['fullname'];
+         // разбил на куски
+         $pieces = explode(" ", $myString[$key]);
+         $person[$key]['surname'] = $pieces[0];
+         $person[$key]['name'] = $pieces[1];
+         $person[$key]['patronomyc'] = $pieces[2];
+         //склеил
+         $my_fullname[$key] = $pieces[$key][0] . " " . $pieces[$key][1] . " " . $pieces[$key][2];
+         //сократил
+         $shortSurname = $person[$key]['surname'];
+         $shortN = mb_substr(($person[$key]['name']), 0, 1, "UTF-8");
+         $shortSurnameN[$key] = $shortSurname . " " . $shortN;
+     }
+     //строю масив полов для второго возможного человека
+     foreach ($person as $key => $array) {
+
+         $floor = 0;
+
+         $pieces[$key][0] = $person[$key]['surname'];
+         $pieces[$key][1] = $person[$key]['name'];
+         $pieces[$key][2] = $person[$key]['patronomyc'];
+
+         //проверка на фамилии
+         if ((substr(($pieces[$key][0]), -4)) == "ва") {
+             $floor--;
+         } elseif (((substr(($pieces[$key][0]), -2)) == "в")) {
+             $floor++;
+         } else {
+         }
+
+         //проверка на имени
+         if ((substr(($pieces[$key][1]), -2)) == "а") {
+             $floor--;
+         } elseif (((substr(($pieces[$key][1]), -2)) == "й") || ((substr(($pieces[$key][1]), -2)) == "н")) {
+             $floor++;
+         } else {
+         }
+
+         //проверка на отчество
+         if ((substr(($pieces[$key][2]), -6)) == "вна") {
+             $floor--;
+         } elseif (((substr(($pieces[$key][2]), -4)) == "ич")) {
+             $floor++;
+         } else {
+         }
+
+         //вычисление пола
+         switch ($floor) {
+             case ($floor >= 0):
+                 $floor = 1;
+                 break;
+             case ($floor <= 0):
+                 $floor = -1;
+                 break;
+             default :
+                 $floor = 0;
+         }
+         $array_floor[$key] = $floor;
      }
 
-     $chose_people1 = $shortName[$randon_number1];
-     $chose_people2 = $shortName[$randon_number2];
+     /////////////////////////////////////////////
 
+
+     //расчет идеальной пары
+     $randon_number2 =  (rand(0, (count($shortSurnameN)-1)));
+
+     //подбор идеальной пары через цикл. Первый человек статичный, второй динамический
+     while (($gender_poName_person1 == $array_floor[$randon_number2]) || ($array_floor[$randon_number2] == 0) ){
+         $randon_number2 =  (rand(0, (count($shortSurnameN)-1)));
+     }
+
+     $chose_people1 = $sokratil_love_fullName_person1;
+     $chose_people2 = $shortSurnameN[$randon_number2];
 
      $number1 = 5000;
      $number2 = 10000;
-     $prochent = (rand($number1, $number2)) / 100;
+     $prochent = (rand($number1, $number2) )/100;
 
      echo "$chose_people1 + $chose_people2 = <br>";
-     echo "Идеально на $prochent%";
+     echo "Идеально на $prochent%<br>";
+     echo "<br><br><br><br>";
+
  }
 
 
@@ -233,6 +304,7 @@
 
          //вызов функции сокращенного имени
          $shortName = getShortName($fullNameFunction);
+         echo "$shortName <br>";
 
          //вызов функции определения пола
          $genderFromName = getGenderFromName($fullNameFunction);
@@ -241,203 +313,17 @@
          //масив полов для статы
          $array_floor[$key] = $genderFromName;
 
+         //масив масивов имен с сокращенными именами
+         $personality[$key] = $partsFromFullname;
+
+         //вызов функции идеальной пары
+         getPerfectPartner($personality[$key][0],$personality[$key][1],$personality[$key][2],$example_persons_array);
 
      }
 
         //вызов функции определения пола
         getGenderDescription($array_floor);
 
-
-
-/*
- //собираю строки в месте
- function getFullnameFromParts ($dataSurnameNamePatronomyc){
-     $person = $dataSurnameNamePatronomyc;
-     $pieces = [];
-     foreach ($person as $key => $array){
-         $pieces[$key][0] = $person[$key]['surname'];
-         $pieces[$key][1] = $person[$key]['name'];
-         $pieces[$key][2] = $person[$key]['patronomyc'];
-         $my_fullname[$key] = $pieces[$key][0]." ".$pieces[$key][1]." ".$pieces[$key][2];
-     }
-     echo '<pre>';
-     echo var_export($my_fullname);
-     echo '</pre>';
-     return $my_fullname;
-
-
- }
-
- $fullNameFunction = getFullnameFromParts(person());
-
-
- //разбиваю строку на три строки surname,name,patronomyc(пункт из задания)
- function getPartsFromFullname ($getFullnameFromParts1){
-     $my_fullname = $getFullnameFromParts1;
-
-     for ($i = 0; $i < count($my_fullname); $i++){
-         $pieces = explode(" ", $my_fullname[$i]);
-         $personality[$i]['surname'] = $pieces[0];
-         $personality[$i]['name'] = $pieces[1];
-         $personality[$i]['patronomyc'] = $pieces[2];
-     }
-     echo '<pre>';
-     echo var_export($personality);
-     echo '</pre>';
-     return $personality;
-
- }
-
-/*
-
- //функция сокращения имени
- function getShortName ($personality){
-     $personality;
-     for ($i = 0; $i < count($personality); $i++){
-
-         $pieces[0] = $personality[$i]['surname'];
-         $pieces[1] = mb_substr(( $personality[$i]['name']),0,1,"UTF-8");
-         $shortName[$i] = $pieces[0]." ". $pieces[1];
-     }
-     echo '<pre>';
-     echo var_export($shortName);
-     echo '</pre>';
-     return $shortName;
- }
-
-
-
-
-
-  //функция определения пола
-  function getGenderFromName($personality){
-
-      $personality;
-
-      foreach ($personality as $key => $array){
-
-          $floor = 0;
-
-          $pieces[$key][0] = $personality[$key]['surname'];
-          $pieces[$key][1] = $personality[$key]['name'];
-          $pieces[$key][2] = $personality[$key]['patronomyc'];
-
-          //проверка на фамилии
-          if ( (substr( ( $pieces[$key][0]), -4) ) == "ва" ){
-              $floor--;
-          }elseif( ( (substr( ( $pieces[$key][0]), -2) ) == "в" ) ){
-              $floor++;
-          }else{}
-
-
-          //проверка на имени
-          if ( (substr( ( $pieces[$key][1]), -2) ) == "а" ){
-              $floor--;
-          }elseif(  ( (substr( ( $pieces[$key][1]), -2) ) == "й" ) ||  ( (substr( ( $pieces[$key][1]), -2) ) == "н" )  ){
-              $floor++;
-          }else{}
-
-
-          //проверка на отчество
-          if ((substr( ( $pieces[$key][2]), -6) ) == "вна" ){
-              $floor--;
-          }elseif(  ((substr( ( $pieces[$key][2]), -4) ) == "ич" )  ){
-              $floor++;
-          }else{}
-
-
-          //вычисление пола
-          switch ($floor){
-              case ( $floor >= 0 ):
-                  $floor = 1;
-                  break;
-              case ( $floor <= 0 ):
-                  $floor = -1;
-                  break;
-              default :
-                  $floor = 0;
-          }
-
-          $array_floor[$key] = $floor;
-      }
-      echo '<pre>';
-      echo var_export($array_floor);
-      echo '</pre>';
-      return $array_floor;
-  }
-
-
-   //функция статистики
-   function getGenderDescription($array_floor)
-   {
-       $array_floor;
-       //Фильтры для статистики
-  //мужицкий фильтр
-       function filterArrayMan($value)
-       {
-           return ($value == 1);
-       }
-
-       $filteredArrayMan = array_filter($array_floor, 'filterArrayMan');
-  //женский
-       function filterArrayGerl($value)
-       {
-           return ($value == -1);
-       }
-
-       $filteredArrayGerl = array_filter($array_floor, 'filterArrayGerl');
-
-  //третий фильтр
-       function filterArrayOno($value)
-       {
-           return ($value == 0);
-       }
-
-       $filteredArrayOno = array_filter($array_floor, 'filterArrayOno');
-
-  //сама статистика
-       $all_man = round(((100 / (count($array_floor))) * count($filteredArrayMan)), 1);
-       $all_gerl = round(((100 / (count($array_floor))) * count($filteredArrayGerl)), 1);
-       $all_ono = round(((100 / (count($array_floor))) * count($filteredArrayOno)), 1);
-
-
-       $statistic = [$all_man , $all_gerl , $all_ono];
-
-       echo "Гендерный состав аудитории:<br>";
-       echo "---------------------------<br>";
-       echo "Мужчины - $all_man%<br>";
-       echo "Женщины  - $all_gerl%<br>";
-       echo "Не удалось определить - $all_ono%<br>";
-   }
-
-function getPerfectPartner($shortName, $array_floor){
-
-    $shortName;
-    $array_floor;
-
-    $randon_number1 =  (rand(0, (count($shortName)-1)));
-    $randon_number2 =  (rand(0, (count($shortName)-1)));
-
-    //подбор идеальной пары через цикл
-    while (($array_floor[$randon_number1] == $array_floor[$randon_number2]) || ($array_floor[$randon_number1] == 0) || ($array_floor[$randon_number2] == 0) ){
-        $randon_number1 =  (rand(0, (count($shortName)-1)));
-        $randon_number2 =  (rand(0, (count($shortName)-1)));
-    }
-
-    $chose_people1 = $shortName[$randon_number1];
-    $chose_people2 = $shortName[$randon_number2];
-
-
-    $number1 = 5000;
-    $number2 = 10000;
-    $prochent = (rand($number1, $number2) )/100;
-
-    echo "$chose_people1 + $chose_people2 = <br>";
-    echo "Идеально на $prochent%";
-
-}
-
-*/
  ?>
  <br>
  <br>
